@@ -20,7 +20,6 @@ from sklearn.metrics import (
 )
 from sklearn.preprocessing import label_binarize
 
-
 def compute_metrics(y_true, y_pred, classes):
     return {
         "accuracy": round(accuracy_score(y_true, y_pred), 4),
@@ -41,7 +40,6 @@ def compute_metrics(y_true, y_pred, classes):
             4,
         ),
     }
-
 
 def plot_confusion_matrix(ax, cm, classes, title):
     cm_norm = cm.astype(float) / np.where(
@@ -71,7 +69,6 @@ def plot_confusion_matrix(ax, cm, classes, title):
     ax.tick_params(axis="x", rotation=30, labelsize=9)
     ax.tick_params(axis="y", rotation=0, labelsize=9)
 
-
 def plot_roc_curves(ax, y_true, probs_df, classes, title):
     colors = ["#FF4444", "#FFD700", "#1565C0"]
     y_bin = label_binarize(y_true, classes=classes)
@@ -92,7 +89,6 @@ def plot_roc_curves(ax, y_true, probs_df, classes, title):
         ax.plot(
             fpr, tpr, color=color, linewidth=2, label=f"{cls}  (AUC = {roc_auc:.3f})"
         )
-
     ax.plot([0, 1], [0, 1], "k--", linewidth=1, label="Random")
     ax.set_xlabel("False Positive Rate", fontsize=10)
     ax.set_ylabel("True Positive Rate", fontsize=10)
@@ -102,7 +98,6 @@ def plot_roc_curves(ax, y_true, probs_df, classes, title):
     ax.spines[["top", "right"]].set_visible(False)
     ax.set_xlim(0, 1)
     ax.set_ylim(0, 1.02)
-
 
 def plot_per_class_recall(ax, fold_names, fold_metrics_per_class, classes):
     x = np.arange(len(fold_names))
@@ -120,7 +115,6 @@ def plot_per_class_recall(ax, fold_names, fold_metrics_per_class, classes):
             edgecolor="white",
             alpha=0.85,
         )
-
     ax.set_xticks(x + width)
     ax.set_xticklabels(fold_names, rotation=30, fontsize=8)
     ax.set_ylabel("Recall", fontsize=10)
@@ -129,7 +123,6 @@ def plot_per_class_recall(ax, fold_names, fold_metrics_per_class, classes):
     ax.legend(fontsize=9)
     ax.grid(axis="y", linestyle="--", alpha=0.4)
     ax.spines[["top", "right"]].set_visible(False)
-
 
 def main():
     pred_dir = (
@@ -211,11 +204,9 @@ def main():
     rows.append({"fold": "OVERALL", **overall})
     pd.DataFrame(rows).to_csv(os.path.join(out_dir, "metrics_summary.csv"), index=False)
 
-    # ── PDF report ──
     pdf_path = os.path.join(out_dir, "evaluation_report.pdf")
     with PdfPages(pdf_path) as pdf:
 
-        # ── Page 1: Overall confusion matrix + ROC curves ──
         fig1, (ax_cm, ax_roc) = plt.subplots(1, 2, figsize=(14, 6))
         fig1.suptitle("Overall Results", fontsize=13, fontweight="bold")
 
@@ -232,7 +223,6 @@ def main():
         pdf.savefig(fig1, dpi=150, bbox_inches="tight")
         plt.close(fig1)
 
-        # ── Page 2: Per-class recall bars + overall metrics bar ──
         fig2, (ax_recall, ax_metrics) = plt.subplots(1, 2, figsize=(14, 6))
         fig2.suptitle("Per-Fold Analysis", fontsize=13, fontweight="bold")
 
@@ -261,8 +251,6 @@ def main():
         plt.tight_layout()
         pdf.savefig(fig2, dpi=150, bbox_inches="tight")
         plt.close(fig2)
-
-        # ── Page 3: Per-fold confusion matrices ──
         n = len(fold_files)
         ncols = min(3, n)
         nrows = int(np.ceil(n / ncols))
@@ -285,8 +273,6 @@ def main():
         plt.tight_layout()
         pdf.savefig(fig3, dpi=150, bbox_inches="tight")
         plt.close(fig3)
-
-        # ── Page 4: Per-fold ROC curves ──
         fig4, axes4 = plt.subplots(nrows, ncols, figsize=(6 * ncols, 5.5 * nrows))
         fig4.suptitle("Per-Fold ROC Curves", fontsize=13, fontweight="bold")
         axes4_flat = np.array(axes4).flatten()
@@ -310,7 +296,6 @@ def main():
 
     print(f"\nReport saved -> {pdf_path}")
     print(f"Metrics CSV -> {out_dir}/metrics_summary.csv")
-
 
 if __name__ == "__main__":
     main()
